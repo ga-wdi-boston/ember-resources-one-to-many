@@ -6,10 +6,6 @@
 ### Foundations
 At this point, students have already learned how to:
 
-- Configure the Ember Router to point to a new Template.
-- Use an Ember View to handle events triggered within a routable template.
-- Create nested view states and route to them appropriately.
-- Set up resource routes (with their respective Ember Routes).
 - Create Ember Components to represent UI elements and encapsulate related data and behavior.
 - Use `ember-data` to set up Models representing business data.
 - Link the `ember-data` data store to a JSON API through an Adapter.
@@ -18,226 +14,226 @@ At this point, students have already learned how to:
 ### Objectives
 By the end of this lesson, students should be able to:
 
-- Trigger Route `action`s from Templates and Component Templates.
-- Create Component `action`s and trigger them from Component Templates.
-- Trigger Route `action`s from Component `action`s.
-- Add `action`s to an Ember Route for each of the standard CRUD actions (index, create, show, update, destroy) to effect changes onto the Route's model.
-- Explain the meaning of the expression "actions up, data down".
+- Define a one-to-one relationship between different Models.
+- Define a one-to-many relationship between different Models.
+- Define a many-to-many relationship between different Models.
+- Define a self-referential relationship on a single Model.
+- Set up mocks for interrelated models (of each type above) using Mirage Fixtures.
 
 ### Setup
 1. Fork and clone this repo.
 2. Run `npm install && bower install`
 3. Run `ember install ember-legacy-views`
-4. Run `ember install ember-cli-mirage`
+4. Run `ember install ember-cli-mirage`, but _do not_ overwrite the `config.js` file. Additionally, delete the `scenarios` directory.
 
-## The Shifting Landscape of Ember CRUD
-Wow! We've really come a long way with Ember so far. We've learned all about the different parts of an Ember application: Templates, `Ember.View`, `Ember.Route`, `Ember.Router`, `Ember.Component`, `ember-data`, `DS.Model`... Now it's finally time to tie all of this together through one of the core functionalities of most applications, CRUD.
+## `ember-data` Associations
+By the end of the last lesson, `ember-crud`, we set out to have an Ember application that could perform CRUD on two separate and unrelated resources, 'pokemon' and 'items'. This is useful for a demonstration, but most of the time (as you probably know by now) your application will need to employ some form of relationship. In this lesson, we'll explore how three different kinds of relationships - one-to-one, one-to-many, and many-to-many - can be implemented in an Ember application, and how test fixtures can be built for that kind of relationship. We will _not_ be focusing on CRUD; that's the topic of the next lesson.
 
-Before talking about CRUD, though, we should start by talking about 'actions'. 'Actions' are a special class of trigger-able events that are handled by the `Ember.ActionHandler` Ember Class. Like normal events, actions will 'bubble' - move from the leaf (i.e. Template) to the root (i.e. the 'application' Route), until they are met by a matching handler.
+### One-to-Many Relationship
+![Games](./readme-assets/cartridges.jpg)
+Pokemon games have been produced since 1996, and there are currently six generations of games. Each generation of games takes place in a different region of the 'world', and consequently introduces a new set of Pokemon into the large (and growing) Pokemon universe.
 
-In Ember 1, actions were used inside the Controller to control Model CRUD. This made sense, since the Controller was responsible for managing all of the business data in our application; an action could be triggered in the Template, bubble up through the View, and reach a Controller, where it would cause the controller to manipulate Model data.
+A 'generation' has :
+* a name (with date range)
+* a description (taken from Wikipedia) - one long string
+* a list of games in that generation, represented as an array of strings
 
-However, with the growing role of Components in Ember 2, a lot of the functionality of Controllers has been made redundant, and the current plan for Ember 2 calls for Controllers to be phased out completely; as a result, we need another place to put action handlers for performing Model CRUD. Fortunately, Components and Routes both incorporate `Ember.ActionHandler`, so we can instead set our action handlers inside either of those objects.
+Let's go ahead and create a Model and Adapter for the 'generation' resource; afterwards, we'll make a Mirage fixture for them to hook into.
+```bash
+ember g model generation
+ember g model adapter
+```
 
-For simplicity's sake, we're going to put all handlers related to Model CRUD into the Route; any other handlers can be placed in either place.
-
-Defining Action handlers in a Route is very easy. Simply open up the `route.js` file and make the following addition:
+Inside the 'generation' Model, let's define the following schema:
 ```javascript
-import Ember from 'ember';
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  description: DS.attr('string'),
+  games: DS.attr()
+});
+```
+> `games` is going to be an array, which is not one of the standard types that DS.attr can create, so we're just going to leave it unconfigured.
 
-export default Ember.Route.extend({
-  model: function(...){
-    ...
-  },
-  actions: {
-    create: function(){ ... },
-    update: function(){ ... },
-    destroy: function(){ ... }
-    // ... etc
-  }
+We'll also need to make some small modifications to the adapter - basically, it should be the same as the adapter for 'item'.
+```javascript
+import ApplicationAdapter from '../application/adapter';
+
+export default ApplicationAdapter.extend({
+  namespace: 'api'
 });
 ```
 
-Inside each of these actions, we can add code to manipulate that Route's model (which, conveniently enough, is provided within the Route). To trigger an action, you can add an `{{action ... }}` helper to an element (usually a button) - this will cause that element to launch the action whenever it executes its defaults behavior (in the case of a button, being clicked).
+Next, we would typically need to make a Mirage test fixture with some data inside Mirage; fortunately, one has already been created for you at `fixtures/generations.js`.
 
-## Handling Actions in Practice
-This has all been fairly abstract, so let's bring it down to earth by looking at how this works in an app. But not just any app...
-
-![Charmander Used 'Ember'](./readme-assets/charmander.jpeg)
-
-We're going to make a **Pokemon Directory (a.k.a. 'Pokedex')**, an application that keeps track of Pokemon that we've observed. This app will allows us to do the following CRUD operations:
-- Add a new Pokemon to the directory.
-- Edit an existing Pokemon.
-- Remove a Pokemon from the directory.
-
-As a first step for setting that up, let's give this application a structure for how it should handle actions; then, we can fill out the actions with whatever behavior that app requires.
-
-Let's take a look at our application as it stands right now. It seems that we already have a Mirage test fixture in place, along with a Model to represent a Pokemon and an Adapter to handle the API transactions. Additionally, we have several Templates in place (some of which are already nested). As a result, we can click around and see a list of the Pokemon in our test fixture.
-
-Let's add some action handlers to our Route by opening up `app/pokemon/route.js` and adding the following:
+Let's add routes to our new resource inside `config.js`.
 ```javascript
-actions: {
-  createPokemon: function(){
-    console.log('Route Action : createPokemon');
-  },
-  updatePokemon: function(){
-    console.log('Route Action : updatePokemon');
-  },
-  destroyPokemon: function(){
-    console.log('Route Action : destroyPokemon');
-  }
-}
+this.get('/api/generations');
+this.get('/api/generations/:id');
+this.post('/api/generations');
+this.put('/api/generations/:id');
+this.del('/api/generations/:id');
 ```
-Let's also add some HTML/Handlebars to the 'pokemon' Template:
-```html
-<button {{action 'createPokemon'}}>CREATE</button>
-<button {{action 'updatePokemon'}}>UPDATE</button>
-<button {{action 'destroyPokemon'}}>DESTROY</button>
-```
-We should now see three new buttons appear in the 'pokemon' view state. If we click one of these buttons, it will trigger the corresponding action in the Route.
 
-As was mentioned, Routes are not the only things that can have actions; Components can have them too. Let's add some actions to the 'pokemon-snippet' Component:
+Just for testing purposes, let's create a new Route for the 'index' view state (`ember g route index`), and add both 'pokemon' and 'generations' to the `model` method on that Route.
 ```javascript
-actions: {
-  updatePokemon: function(){
-    console.log('Component Action : updatePokemon');
+export default Ember.Route.extend({
+  model: function(){
+    return {
+      generations: this.store.findAll('generation'),
+      pokemon: this.store.findAll('pokemon')
+    }
   }
-}
+});
 ```
-and some new buttons to the Template for 'pokemon-snippet':
-```html
-<strong>#{{pokemon.nationalPokeNum}} : {{pokemon.name}}</strong>
-<button {{action 'updatePokemon'}}>EDIT</button>
-<p> Generation: {{pokemon.generation}} </p>
-<p> Type: {{pokemon.typeOne}} {{#if twoTypes}}/ {{pokemon.typeTwo}}{{/if}} </p>
-```
-Clicking these new buttons triggers their respective actions in the Component. Simple enough!
+If we then open up the Ember Inspector to the 'Data' tab, all of our data should be visible!
 
-What if we want to trigger a Route action from within a Component? Because Components are essentially modular, this can only be accomplished by passing that action into the Component when the Component is created. Let's modify the 'pokemon' Template as follows:
-```html
-{{#each model as |pokemon|}}
-  {{pokemon-snippet pokemon=pokemon routeUpdatePokemon='updatePokemon' routeDestroyPokemon='destroyPokemon'}}
-{{/each}}
-```
-This will make the `updatePokemon` and `destroyPokemon` Route actions available to the 'pokemon-snippet' Component, under the aliases of `routeUpdatePokemon` and `routeDestroyPokemon`, respectively. To actually trigger one of these actions from within the Component, we can call the method `sendAction`, passing in the name of the desired action as the first argument.
+Now that the groundwork has been laid, let's come back to the topic of associations. In this app, we will model the relationship between resources 'generation' and 'pokemon' as a one-to-many relationship, where one 'generation' is associated with many different 'pokemon'.
+
+We can define this relationship in the 'generation' Model as follows:
 ```javascript
-actions: {
-  updatePokemon: function(){
-    console.log('Component Action : updatePokemon');
-    this.sendAction('routeUpdatePokemon');
-  }
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  description: DS.attr('string'),
+  games: DS.attr(),
+  pokemon: DS.hasMany('pokemon', {async: true})
+});
+```
+> `{async: true}` is a configuration setting on `DS.hasMany` that controls a kind of behavior called 'eager/lazy loading'. Don't worry about the details on this right now.
+
+In the 'pokemon' Model, we need to change the 'generation' property from being a number to being a relationship.
+```javascript
+export default DS.Model.extend({
+  nationalPokeNum: DS.attr('number'),
+  name: DS.attr('string'),
+  typeOne: DS.attr('string'),
+  typeTwo: DS.attr('string'),
+  generation: DS.belongsTo('generation', {async: true})
+});
+```
+
+If we open up the Ember Inspector again, in the Data tab, we should be able to see all of the different data types that have been loaded. If we click one of the Pokemon (say, Bulbasaur), navigate to where it says `generation`, send that value to `$E`, and then write `$E.get('content').get('name')`, we should get back the string "First Generation (1996–1998)".
+
+If we go the opposite way, by clicking the first Generation, sending its `pokemon` property to `$E`, and then writing `$E.get('content').forEach(function(p){console.log(p.get('name'));})`, we should see a response like this:
+```
+Bulbasaur
+Ivysaur
+Venusaur
+Charmander
+Charmeleon
+Charizard
+Squirtle
+Wartortle
+Blastoise
+```
+
+### One-to-One Relationship
+As mentioned above, each generation (with one exception, which we'll ignore) takes place in one region of the world. If we have another resource called 'region', it would have a one-to-one relationship with 'generation'.
+
+A 'region' has :
+* a name
+* an array of names of badges that can be collected in the region
+
+Thus, we need a model like this:
+```javascript
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  badges: DS.attr()
+});
+```
+Our adapter should be the same as previous; Mirage routes should follow the same pattern; as with the previous example, the tedious data entry work has been taken care of, and a fixture file has been prepared for you (`fixtures/regions.js`). With all that in place, if we add Regions to our 'index' Route's `model` function, we should be able to see it in the Data tab.
+
+So far so good. Now let's add relationships.
+
+To make a one-to-one relationship in Ember, both models must have a `belongsTo` property, each pointing at the other.
+**region**
+```javascript
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  badges: DS.attr(),
+  generation: DS.belongsTo('generation', {async: true})
+});
+```
+**generation**
+```javascript
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  description: DS.attr('string'),
+  games: DS.attr(),
+  pokemon: DS.hasMany('pokemon', {async: true}),
+  region: DS.belongsTo('region', {async: true})
+});
+```
+We also need to add in ID values to the fixture data for both regions and generations.
+```javascript
+{
+  id: 1,
+  name: 'Kanto',
+  badges: ['boulder', 'cascade', 'thunder', 'rainbow', 'soul', 'marsh', 'volcano', 'earth'],
+  generation: 1
+},
+//...
+```
+```javascript
+{
+  id: 1,
+  name: 'First Generation (1996–1998)',
+  description: 'The original Pokémon games are Japanese role-playing video games (RPGs) with an element of strategy, and were created by Satoshi Tajiri for the Game Boy. These role-playing games, and their sequels, remakes, and English language translations, are still considered the "main" Pokémon games, and the games with which most fans of the series are familiar.',
+  games: ['red', 'green', 'blue', 'yellow'],
+  region: 1
 },
 ```
-Now our Component is capable of triggering Route actions!
 
-### YOUR TURN : Handling Actions
-Now that you've seen how this works with 'updatePokemon', add actions called `destroyPokemon` to the Route and Component, and add a 'DELETE 'button to the Component Template.
+To test these relationships, all we need to do is follow the same approach as the previous time vis-a-vis the Ember Inspector.
 
-## Non-CRUD Actions
-There's no rule that actions need to be related to CRUD. Suppose we wanted to add a button to 'pokemon-snippet' that would toggle between hiding and showing the details (e.g. 'generation') of a given Pokemon. In our Component, let's create a new property, `isExpanded`, and a new action, `toggleExpanded`.
+### Many-to-Many Relationship
+![Pokemon Types](./readme-assets/type-icons.png)
+One of the core ideas of the Pokemon games is that Pokemon come in different 'types' (sometimes more than one); these types not only describe the nature of a particular Pokemon, they also define the types of attacks that a Pokemon is weak (or strong) against.
+
+For now, let's focus on the interplay between 'pokemon' and 'types'. There are many different Pokemon with a given type, and a given Pokemon can have either one or two types; as such, this is a many-to-many relationship.
+
+A 'type' has :
+* a name
+> Just one property for now, but we'll be adding a bunch more in the next example.
+
+The model looks like:
 ```javascript
-export default Ember.Component.extend({
-  tagName: 'li',
-  twoTypes: Ember.computed('pokemon.typeOne', 'pokemon.typeTwo', function(){
-    return this.get('pokemon.typeTwo') && this.get('pokemon.typeTwo') !== this.get('pokemon.typeOne');
-  }),
-  isExpanded: false,
-  actions: {
-    toggleExpanded: function(){
-      this.toggleProperty('isExpanded');
-    },
-    updatePokemon: function(){
-      console.log('Component Action : updatePokemon');
-      this.sendAction('routeUpdatePokemon');
-    },
-    destroyPokemon: function(){
-      console.log('Component Action : destroyPokemon');
-      this.sendAction('routeDestroyPokemon');
-    }
-  }
+export default DS.Model.extend({
+  name: DS.attr('string')
 });
 ```
-Triggering the `toggleExpanded` action will allow us to toggle the value of the `isExpanded` property. Let's make some modifications to the Template for our Component.
-```html
-<strong>#{{pokemon.nationalPokeNum}} : {{pokemon.name}}</strong>
-<button {{action 'toggleExpanded'}}>{{#if isExpanded}}EXPAND{{else}}COLLAPSE{{/if}}</button>
-{{#if isExpanded}}
-  <button {{action 'updatePokemon'}}>EDIT</button>
-  <button {{action 'destroyPokemon'}}>DELETE</button>
-  <p> Generation: {{pokemon.generation}} </p>
-  <p> Type: {{pokemon.typeOne}} {{#if twoTypes}}/ {{pokemon.typeTwo}}{{/if}} </p>
-{{/if}}
-```
-Now every time the 'EXPAND'/'COLLAPSE' button is clicked, the content inside the `{{#if}}` will toggle between being visible and being hidden.
+Test data for this resource is available at `fixtures/types.js`
 
-## CRUD : Destroying a Record
-Now let's add some functionality behind those Route actions - any time the `destroyPokemon` Route action is triggered, we destroy a particular Pokemon. The way to destroy a given record from the data store is `<record>.destroyRecord()`. However, before we can destroy a record, we need to find it; we can do this using `<store>.findRecord(<type of record>, <id>)` (when invoked from a Route, the store is accessible at `this.store`). However, the `findRecord` method returns a _Promise_, so we'll need handle that Promise in the usual way.
+This is a many-to-many relationship, but just barely. To add the relationships, we need to (a) edit the models to reflect the relationship, and (b) update the fixtures with the appropriate data.
+
+<!-- (a) -->
+In order for the many-to-many to be handled correctly, we'll need to replace `typeOne` and `typeTwo` in the Pokemon model with a `hasMany` property, `types`. This will mean needing to change some UI code, but we can get to that at another time.
 ```javascript
-store.findRecord(<type of record>, <id>).then(function(<record>) {
-  <record>.destroyRecord();
+export default DS.Model.extend({
+  nationalPokeNum: DS.attr('number'),
+  name: DS.attr('string'),
+  // typeOne: DS.attr('string'),
+  // typeTwo: DS.attr('string'),
+  types: DS.hasMany('type', {async: true}),
+  generation: DS.belongsTo('generation', {async: true})
 });
 ```
-Inside the Route's `destroyPokemon` action, that code looks like this.
-```javascript
-export default Ember.Route.extend({
-  model: function(){
-    return this.store.findAll('pokemon');
-  },
-  actions: {
-    // ...
-    destroyPokemon: function(){
-      console.log('Route Action : destroyPokemon');
-      this.store.findRecord('pokemon', <id>).then(function(pokemon){
-        pokemon.destroyRecord();
-      });
-    }
-  }
-});
-```
-As you can see, we're missing one critical piece of information : the `id` of the particular Pokemon we want to destroy. What we need to do is pass that information from the 'pokemon-snippet' Component (which has access to that particular record) back up to the Route. How can we do that?
-
-As it turns out, the `sendAction` method can optionally accept additional arguments beyond the name of the action that it's triggering. Let's change the Components `destroyPokemon` action so that it passes in the `id` of the Pokemon it refers to.
-```javascript
-export default Ember.Component.extend({
-  // ...
-  actions: {
-    // ...
-    destroyPokemon: function(){
-      console.log('Component Action : destroyPokemon');
-      this.sendAction('routeDestroyPokemon', this.get('pokemon'));
-    }
-  }
-});
-```
-Then, we change the Route action so that it can accept an argument, `id`.
-```javascript
-export default Ember.Route.extend({
-  model: function(){
-    return this.store.findAll('pokemon');
-  },
-  actions: {
-    // ...
-    destroyPokemon: function(pokemon){
-      console.log('Route Action : destroyPokemon ' + pokemon.get('id'));
-      this.store.findRecord('pokemon', pokemon.get('id')).then(function(pokemon){
-        pokemon.destroyRecord();
-      });
-    }
-  }
-});
-```
-
-As you can see, when we click the 'DELETE' button, the record for that Pokemon gets destroyed.
-
-<!-- ## CRUD : Adding a New Record
-Adding a new Pokemon is a behavior tied to the _list_ of Pokemon instead of any particular Pokemon, so it would make the most sense to handle that behavior outside of the 'pokemon-snippet' Component.
-
-Suppose that we wanted to make a `/pokemon/new` view state so that we could bookmark it
-
-## CRUD : Updating an Existing Record
+<!-- (b)
+<!-- Since we're now using `types` instead of `typeOne` and `typeTwo`, wwe nee --> -->
 
 
-## Additional Resources
+### Self-Referential Relationship
+![It's Super Effective!](./readme-assets/typechart.png)
+As mentioned earlier, the key thing that a Pokemon's type does is define the types of attacks that some particular Pokemon is weak (or strong) against. In essence, a type is related to _other types_, in one of four ways:
+  1. "Super-effective" attack (2X normal damage)
+  2. Normal attack
+  3. "Not very effective" attack (0.5X normal damage)
+  4. "Had no effect" (0 damage)
+
+Because the 'item' resource will need to refer any number of other 'items', this relationship could be described as "self-referential".
+
+> As you can see in the diagram, the interrelationship between the various different types of Pokemon is _complex_. Don't worry - it doesn't matter if we get the data right!
+
+<!-- ## Additional Resources
 List additional related resources such as videos, blog posts and official documentation.
 - Item 1
 - Item 2
