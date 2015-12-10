@@ -1,5 +1,10 @@
 <ul>
 {{#each model as |eachPokemon|}}
-  {{pokemon-snippet pokemon=eachPokemon}}
+  {{pokemon-snippet
+      pokemon=eachPokemon
+      routeDestroyPokemon='destroyPokemon'
+  }}
 {{/each}}
 </ul>
+
+{{outlet}}

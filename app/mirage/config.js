@@ -6,6 +6,12 @@ export default function() {
   this.put('/api/pokemon/:id');
   this.del('/api/pokemon/:id');
 
+  this.get('/api/items');
+  this.get('/api/items/:id');
+  this.post('/api/items');
+  this.put('/api/items/:id');
+  this.del('/api/items/:id');
+
 
   // These comments are here to help you get started. Feel free to delete them.
 

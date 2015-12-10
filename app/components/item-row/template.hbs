@@ -1,0 +1,11 @@
+{{#unless isEditable}}
+  <td>{{item.name}}</td>
+  <td>{{item.category}}</td>
+  <td>{{item.effect}}</td>
+{{else}}
+  <td>{{input valueBinding='item.name'}}</td>
+  <td>{{input valueBinding='item.category'}}</td>
+  <td>{{textarea valueBinding='item.effect'}}</td>
+{{/unless}}
+<td><button {{action 'destroyItem' item}}>X</button></td>
+

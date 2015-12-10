@@ -1,3 +1,27 @@
-<strong>#{{pokemon.nationalPokeNum}} : {{pokemon.name}}</strong>
-<p> Generation: {{pokemon.generation}} </p>
-<p> Type: {{pokemon.typeOne}} {{#if twoTypes}}/ {{pokemon.typeTwo}}{{/if}} </p>
+{{#unless isEditable}} {{!-- Non-editable Version --}}
+
+  <strong>#{{pokemon.nationalPokeNum}} : {{pokemon.name}}</strong>
+  <button {{action 'toggleExpanded'}}>
+    {{#unless isExpanded}}EXPAND{{else}}COLLAPSE{{/unless}}
+  </button>
+  {{#if isExpanded}}
+    <button {{action 'toggleEditable'}}>EDIT</button>
+    <button {{action 'destroyPokemon'}}>DELETE</button>
+    <p> Generation: {{pokemon.generation}} </p>
+    <p> Type: {{pokemon.typeOne}} {{#if twoTypes}}/ {{pokemon.typeTwo}}{{/if}} </p>
+  {{/if}}
+
+{{else}}  {{!-- Editable Version --}}
+
+  <strong>
+    #{{input valueBinding='pokemon.nationalPokeNum'}} : {{input valueBinding='pokemon.name'}}
+  </strong>
+  <button {{action 'toggleExpanded'}}>
+    {{#unless isExpanded}}EXPAND{{else}}COLLAPSE{{/unless}}
+  </button>
+  <button {{action 'toggleEditable'}}>CONFIRM EDIT</button>
+  <button {{action 'destroyPokemon'}}>DELETE</button>
+  <p> Generation: {{input valueBinding='pokemon.generation'}} </p>
+  <p> Type: {{input valueBinding='pokemon.typeOne'}} / {{input valueBinding='pokemon.typeTwo'}} </p>
+
+{{/unless}}
