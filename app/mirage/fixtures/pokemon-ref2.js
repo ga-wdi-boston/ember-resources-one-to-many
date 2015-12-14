@@ -5,6 +5,7 @@ export default [
     name: 'Bulbasaur',
     typeOne: 'GRASS',
     typeTwo: 'POISON',
+    types: [10, 14],
     generation: 1
   },
   {
@@ -13,6 +14,7 @@ export default [
     name: 'Ivysaur',
     typeOne: 'GRASS',
     typeTwo: 'POISON',
+    types: [10, 14],
     generation: 1
   },
   {
@@ -21,6 +23,7 @@ export default [
     name: 'Venusaur',
     typeOne: 'GRASS',
     typeTwo: 'POISON',
+    types: [10, 14],
     generation: 1
   },
   {
@@ -29,6 +32,7 @@ export default [
     name: 'Charmander',
     typeOne: 'FIRE',
     typeTwo: '',
+    types: [7],
     generation: 1
   },
   {
@@ -37,6 +41,7 @@ export default [
     name: 'Charmeleon',
     typeOne: 'FIRE',
     typeTwo: '',
+    types: [7],
     generation: 1
   },
   {
@@ -45,6 +50,7 @@ export default [
     name: 'Charizard',
     typeOne: 'FIRE',
     typeTwo: 'FLYING',
+    types: [7,8],
     generation: 1
   },
   {
@@ -53,6 +59,7 @@ export default [
     name: 'Squirtle',
     typeOne: 'WATER',
     typeTwo: '',
+    types: [18],
     generation: 1
   },
   {
@@ -61,6 +68,7 @@ export default [
     name: 'Wartortle',
     typeOne: 'WATER',
     typeTwo: '',
+    types: [18],
     generation: 1
   },
   {
@@ -69,6 +77,7 @@ export default [
     name: 'Blastoise',
     typeOne: 'WATER',
     typeTwo: '',
+    types: [18],
     generation: 1
   }
 ];
