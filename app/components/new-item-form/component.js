@@ -11,7 +11,7 @@ export default Ember.Component.extend({
       name: this.get('name'),
       category: this.get('category'),
       effect: this.get('effect')
-    }
+    };
   }),
   actions: {
     createItem: function(){
