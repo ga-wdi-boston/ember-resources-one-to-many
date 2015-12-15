@@ -41,7 +41,7 @@ A 'generation' has :
 Let's go ahead and create a Model and Adapter for the 'generation' resource; afterwards, we'll make a Mirage fixture for them to hook into.
 ```bash
 ember g model generation
-ember g model adapter
+ember g adapter generation
 ```
 
 Inside the 'generation' Model, let's define the following schema:
