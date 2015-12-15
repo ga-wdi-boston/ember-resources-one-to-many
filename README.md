@@ -150,6 +150,7 @@ To make a one-to-one relationship in Ember, both models must have a `belongsTo` 
 export default DS.Model.extend({
   name: DS.attr('string'),
   badges: DS.attr(),
+  // generation: DS.attr('number')
   generation: DS.belongsTo('generation', {async: true})
 });
 ```
@@ -214,11 +215,12 @@ export default DS.Model.extend({
   // typeOne: DS.attr('string'),
   // typeTwo: DS.attr('string'),
   types: DS.hasMany('type', {async: true}),
+  // generation: DS.attr('number')
   generation: DS.belongsTo('generation', {async: true})
 });
 ```
-<!-- (b)
-<!-- Since we're now using `types` instead of `typeOne` and `typeTwo`, wwe nee --> -->
+<!-- (b) -->
+<!-- Since we're now using `types` instead of `typeOne` and `typeTwo`, we need to update the 'pokemon-snippet' Template to show types properly. -->
 
 
 ### Self-Referential Relationship
