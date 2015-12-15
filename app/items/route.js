@@ -5,8 +5,9 @@ export default Ember.Route.extend({
     return this.store.findAll('item');
   },
   actions: {
-    createItem: function(newItem){
-      this.store.createRecord('item', newItem).save();
+    createItem: function(newItemData){
+      var newItem = this.store.createRecord('item', newItemData);
+      newItem.save();
     },
     destroyItem: function(item){
       this.store.findRecord('item', item.get('id')).then(function(itemRecord){
