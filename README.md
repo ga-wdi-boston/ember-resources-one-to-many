@@ -67,11 +67,11 @@ Next, we would typically need to make a Mirage test fixture with some data insid
 
 Let's add routes to our new resource inside `config.js`.
 ```javascript
-this.get('/api/generations');
-this.get('/api/generations/:id');
-this.post('/api/generations');
-this.put('/api/generations/:id');
-this.del('/api/generations/:id');
+this.get('/generations');
+this.get('/generations/:id');
+this.post('/generations');
+this.put('/generations/:id');
+this.del('/generations/:id');
 ```
 
 Just for testing purposes, let's create a new Route for the 'index' view state (`ember g route index`), and add both 'pokemon' and 'generations' to the `model` method on that Route.
@@ -107,9 +107,12 @@ export default DS.Model.extend({
   name: DS.attr('string'),
   typeOne: DS.attr('string'),
   typeTwo: DS.attr('string'),
+  // generation: DS.attr('number')
   generation: DS.belongsTo('generation', {async: true})
 });
 ```
+
+Finally, we need to update the content of our fixture so that it has the correct data. Copy the content from `fixtures/generations-ref2.js` and paste it over (i.e. overwrite) the content of `fixtures/generations.js`.
 
 If we open up the Ember Inspector again, in the Data tab, we should be able to see all of the different data types that have been loaded. If we click one of the Pokemon (say, Bulbasaur), navigate to where it says `generation`, send that value to `$E`, and then write `$E.get('content').get('name')`, we should get back the string "First Generation (1996–1998)".
 
