@@ -220,6 +220,22 @@ export default DS.Model.extend({
   generation: DS.belongsTo('generation', {async: true})
 });
 ```
+
+##### Updating the Fixtures
+Since we want to link 'pokemon' to 'types', we need to have data somewhere indicating which 'pokemon' connect with which 'types', and this means editing our Mirage fixtures. Each 'pokemon' will need to have a new property called `types` whose value is an array of ids, like this:
+```javascript
+{
+  id: 1,
+  nationalPokeNum: 1,
+  name: 'Bulbasaur',
+  types: [10, 14],
+  generation: 1
+},
+```
+In real life, this work might be tedious. Thankfully, another reference fixture with all of these updates has been provided - simply copy the contents of `fixtures/pokemon-ref3.js` and overwrite the contents of `fixtures/pokemon.js`.
+
+What about the inverse side of the relationship, referencing specific 'pokemon' from each 'type'? As tedious as the previous step might have been to do by hand, adding 'pokemon' id values for _every Pokemon of a given type_ to _each object in the 'types' fixture_ sounds significantly worse. Fortunately, as it turns out, Ember has our backs on this one. Because we've set up this relationship as many-to-many, by default Ember will automatically calculate the inverse side of the relationship, allowing us to reference 'pokemon' from a given 'type' without doing any additional work.
+> This default behavior can be overriden, and we will see that in the last example.
 <!-- (b) -->
 <!-- Since we're now using `types` instead of `typeOne` and `typeTwo`, we need to update the 'pokemon-snippet' Template to show types properly. -->
 
