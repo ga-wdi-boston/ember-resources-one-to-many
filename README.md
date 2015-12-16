@@ -313,7 +313,7 @@ But with that done, all that's left is going through the Template and replacing 
 > Well... not quite. As written, if you try change the type of a Pokemon through 'pokemon-snippet' when it's in "editable" mode, it will simply change the name of the type instead of changing the relation. We'll come back to this when we look at doing CRUD with associations.
 
 ### Self-Referential Relationship
-![It's Super Effective!](./readme-assets/typechart.png)
+![It's Super Effective!](./readme-assets/typechart.jpeg)
 As mentioned earlier, the key thing that a Pokemon's type does is define the types of attacks that some particular Pokemon is weak (or strong) against. In essence, a type is related to _other types_, in one of four ways:
   1. "Super-effective" attack (2X normal damage)
   2. Normal attack
@@ -323,6 +323,51 @@ As mentioned earlier, the key thing that a Pokemon's type does is define the typ
 Because the 'item' resource will need to refer any number of other 'items', this relationship could be described as "self-referential".
 
 > As you can see in the diagram, the interrelationship between the various different types of Pokemon is _complex_. Don't worry - it doesn't matter if we get the data right!
+
+Defining a self-referential relationship in Ember is basically the same as defining any other kind of relationship: for `type`, we can simply create a new property in the Model called `doubleDamageFrom` and make it a `hasMany` or `belongsTo` with respect to `type`.
+```javascript
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  pokemon: DS.hasMany('pokemon', {async: true}),
+  doubleDamageFrom: DS.hasMany('type', {async: true})
+});
+```
+
+`doubleDamageFrom` defines one half of the relationship between one type and other types; how then could we refer back to a parent 'type' from one of the `doubleDamageFrom` 'types'? We'd need to define another property, perhaps `doubleDamageTo`, which also refers to multiple 'types'.
+```javascript
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  pokemon: DS.hasMany('pokemon', {async: true}),
+  doubleDamageFrom: DS.hasMany('type', {async: true}),
+  doubleDamageTo: DS.hasMany('type', {async: true})
+});
+```
+But this just establishes two separate, unconnected relations. To tell Ember that 'doubleDamageTo' is the opposite of 'doubleDamageFrom' (and vice versa) requires that we define each as the "inverse" operation of the other by passing in a reference to the opposite property, under the key `inverse`:
+```javascript
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  pokemon: DS.hasMany('pokemon', {async: true}),
+  doubleDamageFrom: DS.hasMany('type', {async: true, inverse: 'doubleDamageTo'}),
+  doubleDamageTo: DS.hasMany('type', {async: true})
+});
+```
+> If for whatever reason we didn't want there to be an inverse relationship - for instance, if having an inverse relationship didn't make sense within the scope of the problem - we would need to specify `inverse: null`.
+
+Let's also create two additional properties, `halfDamageFrom` and `noDamageFrom`, along with their inverses:
+```javascript
+export default DS.Model.extend({
+  name: DS.attr('string'),
+  pokemon: DS.hasMany('pokemon', {async: true}),
+  doubleDamageFrom: DS.hasMany('type', {async: true, inverse: 'doubleDamageTo'}),
+  doubleDamageTo: DS.hasMany('type', {async: true}),
+  halfDamageFrom: DS.hasMany('type', {async: true, inverse: 'halfDamageTo'}),
+  halfDamageTo: DS.hasMany('type', {async: true}),
+  noDamageFrom: DS.hasMany('type', {async: true, inverse: 'noDamageTo'}),
+  noDamageTo: DS.hasMany('type', {async: true})
+});
+```
+
+If we copy the data from `fixtures/types-ref3.js` into `fixtures/types.js`, and examine the types from the Ember Inspector, we should be able to see these relationships there!
 
 <!-- ## Additional Resources
 List additional related resources such as videos, blog posts and official documentation.
