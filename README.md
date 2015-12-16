@@ -236,9 +236,81 @@ In real life, this work might be tedious. Thankfully, another reference fixture 
 
 What about the inverse side of the relationship, referencing specific 'pokemon' from each 'type'? As tedious as the previous step might have been to do by hand, adding 'pokemon' id values for _every Pokemon of a given type_ to _each object in the 'types' fixture_ sounds significantly worse. Fortunately, as it turns out, Ember has our backs on this one. Because we've set up this relationship as many-to-many, by default Ember will automatically calculate the inverse side of the relationship, allowing us to reference 'pokemon' from a given 'type' without doing any additional work.
 > This default behavior can be overriden, and we will see that in the last example.
-<!-- (b) -->
-<!-- Since we're now using `types` instead of `typeOne` and `typeTwo`, we need to update the 'pokemon-snippet' Template to show types properly. -->
 
+##### Changing the UI
+Since we're now using `types` instead of `typeOne` and `typeTwo`, we need to update the 'pokemon-snippet' Component to handle `types`.
+
+There are two lines in the 'pokemon-snippet' Component Template that reference our old approach to types:
+```html
+<p> Type: {{pokemon.typeOne}} {{#if twoTypes}}/ {{pokemon.typeTwo}}{{/if}} </p>
+```
+and
+```html
+<p> Type: {{input valueBinding='pokemon.typeOne'}} / {{input valueBinding='pokemon.typeTwo'}} </p>
+```
+Frankly, since each Component represents one Pokemon, the approach that would probably change the fewest things would be to create some _computed properties on the Component_ , called `typeOneName` and `typeTwoName`, which derive their values from the `types` property on the Model.
+```javascript
+export default Ember.Component.extend({
+  tagName: 'li',
+  typeOneName: Ember.computed('pokemon.@each.types', function(){
+    // @each tells Ember to watch for changes to the values of each element, not just the length of the array
+    // objectAt allows us to pull out either the first or second 'type'
+    return this.get('pokemon.types').objectAt(0).get('name');
+  }),
+  typeTwoName: Ember.computed('pokemon.@each.types', function(){
+    return this.get('pokemon.types').objectAt(1).get('name');
+  }),
+  twoTypes: Ember.computed('pokemon.typeOne', 'pokemon.typeTwo', function(){
+    return this.get('pokemon.typeTwo') && this.get('pokemon.typeTwo') !== this.get('pokemon.typeOne');
+  }),
+  isExpanded: false,
+  isEditable: false,
+  actions: {
+    // ...
+  }
+});
+```
+Doing so means we need to do some minor refactoring of `twoTypes`:
+```javascript
+export default Ember.Component.extend({
+  // ...
+  twoTypes: Ember.computed('pokemon.types', function(){
+    return this.get('pokemon.types').get('length') === 2 && this.get('typeOneName') !== this.get('typeTwoName');
+  }),
+  // ...
+});
+```
+But with that done, all that's left is going through the Template and replacing `pokemon.typeOne` and `pokemon.typeTwo` with `typeOneName` and `typeTwoName`, respectively.
+```html
+{{#unless isEditable}} {{!-- Non-editable Version --}}
+
+  <strong>#{{pokemon.nationalPokeNum}} : {{pokemon.name}}</strong>
+  <button {{action 'toggleExpanded'}}>
+    {{#unless isExpanded}}EXPAND{{else}}COLLAPSE{{/unless}}
+  </button>
+  {{#if isExpanded}}
+    <button {{action 'toggleEditable'}}>EDIT</button>
+    <button {{action 'destroyPokemon'}}>DELETE</button>
+    <p> Generation: {{pokemon.generation.name}} </p>
+    <p> Type: {{typeOneName}} {{#if twoTypes}}/ {{typeTwoName}}{{/if}} </p>
+  {{/if}}
+
+{{else}}  {{!-- Editable Version --}}
+
+  <strong>
+    #{{input valueBinding='pokemon.nationalPokeNum'}} : {{input valueBinding='pokemon.name'}}
+  </strong>
+  <button {{action 'toggleExpanded'}}>
+    {{#unless isExpanded}}EXPAND{{else}}COLLAPSE{{/unless}}
+  </button>
+  <button {{action 'toggleEditable'}}>CONFIRM EDIT</button>
+  <button {{action 'destroyPokemon'}}>DELETE</button>
+  <p> Generation: {{input valueBinding='pokemon.generation.name'}} </p>
+  <p> Type: {{input valueBinding='typeOneName'}} / {{input valueBinding='typeTwoName'}} </p>
+
+{{/unless}}
+```
+> Well... not quite. As written, if you try change the type of a Pokemon through 'pokemon-snippet' when it's in "editable" mode, it will simply change the name of the type instead of changing the relation. We'll come back to this when we look at doing CRUD with associations.
 
 ### Self-Referential Relationship
 ![It's Super Effective!](./readme-assets/typechart.png)
