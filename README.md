@@ -191,23 +191,21 @@ To test these relationships, all we need to do is follow the same approach as th
 
 ### Many-to-Many Relationship
 ![Pokemon Types](./readme-assets/type-icons.png)
-One of the core ideas of the Pokemon games is that Pokemon come in different 'types' (sometimes more than one); these types not only describe the nature of a particular Pokemon, they also define the types of attacks that a Pokemon is weak (or strong) against.
-
-For now, let's focus on the interplay between 'pokemon' and 'types'. There are many different Pokemon with a given type, and a given Pokemon can have either one or two types; as such, this is a many-to-many relationship.
+One of the core ideas of the Pokemon games is that Pokemon come in different "types", such as FIRE, WATER, etc. These types not only describe the nature of a particular Pokemon, they also define the types of attacks that a Pokemon is weak (or strong) against. A Pokemon may have either one or two types; for instance, Bulbasaur is both GRASS- and POISON-typed. However, as there are only 18 "types", and over 700 Pokemon, there are many Pokemon who belong to the same type(s). We can infer from this that if our application were to have 'type' resource, it would need to have a many-to-many relationship with our 'pokemon' resource.
 
 A 'type' has :
 * a name
 > Just one property for now, but we'll be adding a bunch more in the next example.
 
-The model looks like:
+Therefore, a Model for it would look like:
 ```javascript
 export default DS.Model.extend({
   name: DS.attr('string')
 });
 ```
-Test data for this resource is available at `fixtures/types.js`
+Test data for this resource is available at `fixtures/types.js`, but we'll need to add routes for 'types' to Mirage's `config.js` file.
 
-This is a many-to-many relationship, but just barely. To add the relationships, we need to (a) edit the models to reflect the relationship, and (b) update the fixtures with the appropriate data.
+To set up this many-to-many relationship, we need to edit the models to reflect the relationship and update the fixtures with the appropriate data. Once that's done, we can update our Components and Templates so that they refer to the new properties.
 
 <!-- (a) -->
 In order for the many-to-many to be handled correctly, we'll need to replace `typeOne` and `typeTwo` in the Pokemon model with a `hasMany` property, `types`. This will mean needing to change some UI code, but we can get to that at another time.
