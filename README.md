@@ -130,24 +130,24 @@ Blastoise
 ```
 
 ### One-to-One Relationship
-As mentioned above, each generation (with one exception, which we'll ignore) takes place in one region of the world. If we have another resource called 'region', it would have a one-to-one relationship with 'generation'.
+As mentioned above, each generation (with one exception, which we'll ignore) takes place in one and only one region of the world. If our app were to have another resource called 'region', it would have a one-to-one relationship with 'generation'.
 
-A 'region' has :
+Suppose that a 'region' has :
 * a name
 * an array of names of badges that can be collected in the region
 
-Thus, we need a model like this:
+Accordingly, we would need a Model like this:
 ```javascript
 export default DS.Model.extend({
   name: DS.attr('string'),
   badges: DS.attr()
 });
 ```
-Our adapter should be the same as previous; Mirage routes should follow the same pattern; as with the previous example, the tedious data entry work has been taken care of, and a fixture file has been prepared for you (`fixtures/regions.js`). With all that in place, if we add Regions to our 'index' Route's `model` function, we should be able to see it in the Data tab.
+This Model will need an Adapter similar to the ones we made for 'generation', 'item', and 'pokemon'. In order to have some seed data, we will also need a Mirage fixture - one has been provided here at `fixtures/regions.js` - with routes set up just like those of 'generation' in the previous example.
 
-So far so good. Now let's add relationships.
+With all that in place, if we add Regions to our 'index' Route's `model` function, we should be able to see them in the Data tab; once we do, we can begin to add relationships.
 
-To make a one-to-one relationship in Ember, both models must have a `belongsTo` property, each pointing at the other.
+To make a one-to-one relationship in Ember, both Models must have a `belongsTo` property, each referring to the other Model.
 **region**
 ```javascript
 export default DS.Model.extend({
@@ -167,7 +167,7 @@ export default DS.Model.extend({
   region: DS.belongsTo('region', {async: true})
 });
 ```
-We also need to add in ID values to the fixture data for both regions and generations.
+We also need to add in ID values to the fixture data for both regions and generations. Fixture files have been provided with the correct data - simply replace the contents of `fixtures/generations.js` and `fixtures/regions.js` with the contents of `fixtures/generations-ref2.js` and `fixtures/regions-ref2.js`, respectively.
 ```javascript
 {
   id: 1,
@@ -187,7 +187,7 @@ We also need to add in ID values to the fixture data for both regions and genera
 },
 ```
 
-To test these relationships, all we need to do is follow the same approach as the previous time vis-a-vis the Ember Inspector.
+To test these relationships, all we need to do is follow the same approach as the previous example and open up the Ember Inspector to its Data tab.
 
 ### Many-to-Many Relationship
 ![Pokemon Types](./readme-assets/type-icons.png)
