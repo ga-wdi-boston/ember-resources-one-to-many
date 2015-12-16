@@ -207,8 +207,8 @@ Test data for this resource is available at `fixtures/types.js`, but we'll need 
 
 To set up this many-to-many relationship, we need to edit the models to reflect the relationship and update the fixtures with the appropriate data. Once that's done, we can update our Components and Templates so that they refer to the new properties.
 
-<!-- (a) -->
-In order for the many-to-many to be handled correctly, we'll need to replace `typeOne` and `typeTwo` in the Pokemon model with a `hasMany` property, `types`. This will mean needing to change some UI code, but we can get to that at another time.
+##### Editing the Models
+In order for the many-to-many to be handled correctly, we'll need to replace `typeOne` and `typeTwo` in the Pokemon model with a `hasMany` property, `types`. This will mean needing to change some UI code, but we can get to that later.
 ```javascript
 export default DS.Model.extend({
   nationalPokeNum: DS.attr('number'),
