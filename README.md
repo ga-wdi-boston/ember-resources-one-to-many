@@ -195,6 +195,7 @@ One of the core ideas of the Pokemon games is that Pokemon come in different "ty
 
 A 'type' has :
 * a name
+
 > Just one property for now, but we'll be adding a bunch more in the next example.
 
 Therefore, a Model for it would look like:
