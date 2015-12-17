@@ -369,8 +369,5 @@ export default DS.Model.extend({
 
 If we copy the data from `fixtures/types-ref3.js` into `fixtures/types.js`, and examine the types from the Ember Inspector, we should be able to see these relationships there!
 
-<!-- ## Additional Resources
-List additional related resources such as videos, blog posts and official documentation.
-- Item 1
-- Item 2
-- Item 3 -->
+## Additional Resources
+- [Ember Guides](https://guides.emberjs.com/v2.2.0/models/working-with-relationships/)
