@@ -6,16 +6,16 @@ export default Ember.Component.extend({
     category: null,
     effect: null
   },
-  newItem: Ember.computed('form', function(){
+  newItemData: Ember.computed('form', function(){
     return {
-      name: this.get('name'),
-      category: this.get('category'),
-      effect: this.get('effect')
+      name: this.get('form.name'),
+      category: this.get('form.category'),
+      effect: this.get('form.effect')
     };
   }),
   actions: {
     createItem: function(){
-      this.sendAction('routeCreateItem', this.get('newItem'));
+      this.sendAction('routeCreateItem', this.get('newItemData'));
     }
   }
 });
