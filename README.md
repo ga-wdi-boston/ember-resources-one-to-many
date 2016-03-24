@@ -56,36 +56,47 @@ We've even got a model in place, with all of the attributes of a Sighting.
 
 ### Code-Along : Link the Sighting and Pokemon Models
 
-### Code-Along : Show Linked Data in a Template
+Since we have our Models already, the process of linking them together is
+ actually quite easy!
+Let's add a new `pokemon` attribute to the `sighting` model.
+Unlike the others, which use `DS.attr`, we define relationships with separate
+ methods : `.hasMany` and `.belongsTo`
 
-### Code-Along : Create a New Dependent Record, with Association
-
-### Code-Along : Implement "Dependent-Destroy" on the Front End
-
-### Code-Along : Update a Dependent Record's' Associations
-
-Now that the groundwork has been laid, let's come back to the topic of associations. In this app, we will model the relationship between resources 'generation' and 'pokemon' as a one-to-many relationship, where one 'generation' is associated with many different 'pokemon'.
-
-We can define this relationship in the 'generation' Model as follows:
 ```javascript
 export default DS.Model.extend({
-  name: DS.attr('string'),
-  description: DS.attr('string'),
-  games: DS.attr(),
-  pokemon: DS.hasMany('pokemon', {async: true})
+  observationTime: DS.attr('date'),
+  location: DS.attr('string'),
+  observer: DS.attr('string'),
+  pokemon: DS.belongsTo('pokemon', {async: true})
 });
 ```
-> `{async: true}` is a configuration setting on `DS.hasMany` that controls a kind of behavior called 'eager/lazy loading'. Don't worry about the details on this right now.
 
-In the 'pokemon' Model, we need to change the 'generation' property from being a number to being a relationship.
+> `{async: true}` is a configuration setting on `DS.hasMany` that controls a
+>  kind of behavior called 'eager/lazy loading'.
+> Don't worry about the details on this right now.
+
+Then, in the `pokemon` Model, we need to add a new property called `sightings`
+ with the inverse relationship, `hasMany`.
+
 ```javascript
+import Ember from 'ember';
+import DS from 'ember-data';
+
 export default DS.Model.extend({
   nationalPokeNum: DS.attr('number'),
   name: DS.attr('string'),
   typeOne: DS.attr('string'),
   typeTwo: DS.attr('string'),
-  // generation: DS.attr('number')
-  generation: DS.belongsTo('generation', {async: true})
+  types: Ember.computed.collect('typeOne', 'typeTwo'),
+  generation: DS.attr('number'),
+  totalPoints: DS.attr('number'),
+  baseHp: DS.attr('number'),
+  baseAttack: DS.attr('number'),
+  baseDefense: DS.attr('number'),
+  baseSpAttack: DS.attr('number'),
+  baseSpDefense: DS.attr('number'),
+  baseSpeed: DS.attr('number'),
+  sightings: DS.hasMany('sightings', {async: true})
 });
 ```
 
