@@ -1,10 +1,21 @@
-<h4>#{{input value=pokemon.nationalPokeNum}} : {{input value=pokemon.name}}</h4>
-<p> Generation: {{input value=pokemon.generation}} </p>
-<button {{action 'updatePokemon'}}>EDIT</button>
-<button {{action 'destroyPokemon'}}>DESTROY</button>
-<p>
-  Type(s): {{input value=pokemon.typeOne}}
-  {{#if twoTypes}}
-    / {{input value=pokemon.typeTwo}}
-  {{/if}}
-</p>
+{{#unless isEditable}}
+  <h4>#{{pokemon.nationalPokeNum}} : {{pokemon.name}}</h4>
+  <p> Generation: {{pokemon.generation}} </p>
+  <p>
+    Type(s): {{pokemon.typeOne}}
+    {{#if twoTypes}}
+      / {{pokemon.typeTwo}}
+    {{/if}}
+  </p>
+{{else}}
+  <h4>#{{input value=pokemon.nationalPokeNum}} : {{input value=pokemon.name}}</h4>
+  <p> Generation: {{input value=pokemon.generation}} </p>
+  <p>
+    Type(s): {{input value=pokemon.typeOne}}
+    {{#if twoTypes}}
+      / {{input value=pokemon.typeTwo}}
+    {{/if}}
+  </p>
+  <button {{action 'updatePokemon'}}>EDIT</button>
+  <button {{action 'destroyPokemon'}}>DESTROY</button>
+{{/unless}}
