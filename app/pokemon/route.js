@@ -5,14 +5,18 @@ export default Ember.Route.extend({
     return this.store.findAll('pokemon');
   },
   actions: {
-    createPokemon: function(newPokemonData){
-      var newPokemon = this.store.createRecord('pokemon', newPokemonData);
-      newPokemon.save();
+    createPokemon: function(properties){
+      console.log('Route Action : createPokemon');
+      this.store.createRecord('pokemon', properties)
+        .save().then(()=>console.log('record created'));
+    },
+    updatePokemon: function(pokemon) {
+      console.log('Route Action : updatePokemon');
+      pokemon.save();
     },
     destroyPokemon: function(pokemon){
-      this.store.findRecord('pokemon', pokemon.get('id')).then(function(pokemonRecord){
-        pokemonRecord.destroyRecord();
-      });
+      console.log('Route Action : destroyPokemon');
+      pokemon.destroyRecord();
     }
   }
 });

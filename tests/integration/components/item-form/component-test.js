@@ -1,24 +1,23 @@
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 
-moduleForComponent('new-item-form', 'Integration | Component | new item form', {
+moduleForComponent('item-form', 'Integration | Component | item form', {
   integration: true
 });
 
 test('it renders', function(assert) {
-  
   // Set any properties with this.set('myProperty', 'value');
-  // Handle any actions with this.on('myAction', function(val) { ... });" + EOL + EOL +
+  // Handle any actions with this.on('myAction', function(val) { ... });
 
-  this.render(hbs`{{new-item-form}}`);
+  this.render(hbs`{{item-form}}`);
 
   assert.equal(this.$().text().trim(), '');
 
-  // Template block usage:" + EOL +
+  // Template block usage:
   this.render(hbs`
-    {{#new-item-form}}
+    {{#item-form}}
       template block text
-    {{/new-item-form}}
+    {{/item-form}}
   `);
 
   assert.equal(this.$().text().trim(), 'template block text');

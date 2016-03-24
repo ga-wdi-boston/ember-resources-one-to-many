@@ -1,0 +1,16 @@
+<h5> Add a Pokemon to the directory! </h5>
+<div>
+  {{input placeholder='National Pokemon Number' value=form.nationalPokeNum}}
+  {{input placeholder='Name' value=form.name}}
+  {{input placeholder='Type One' value=form.typeOne}}
+  {{input placeholder='Type Two' value=form.typeTwo}}
+  {{input placeholder='Generation' value=form.generation}}
+  {{input placeholder='Total Points' value=form.totalPoints}}
+  {{input placeholder='Base HP' value=form.baseHp}}
+  {{input placeholder='Base Attack' value=form.baseAttack}}
+  {{input placeholder='Base Defense' value=form.baseDefense}}
+  {{input placeholder='Base Sp. Attack' value=form.baseSpAttack}}
+  {{input placeholder='Base Sp. Defense' value=form.baseSpDefense}}
+  {{input placeholder='Base Speed' value=form.baseSpeed}}
+</div>
+<button {{action 'createPokemon'}}> Add a New Pokemon </button>
