@@ -89,22 +89,6 @@ export default DS.Model.extend({
 });
 ```
 
-Finally, we need to update the content of our fixture so that it has the correct data. Copy the content from `fixtures/generations-ref2.js` and paste it over (i.e. overwrite) the content of `fixtures/generations.js`.
-
-If we open up the Ember Inspector again, in the Data tab, we should be able to see all of the different data types that have been loaded. If we click one of the Pokemon (say, Bulbasaur), navigate to where it says `generation`, send that value to `$E`, and then write `$E.get('content').get('name')`, we should get back the string "First Generation (1996–1998)".
-
-If we go the opposite way, by clicking the first Generation, sending its `pokemon` property to `$E`, and then writing `$E.get('content').forEach(function(p){console.log(p.get('name'));})`, we should see a response like this:
-```
-Bulbasaur
-Ivysaur
-Venusaur
-Charmander
-Charmeleon
-Charizard
-Squirtle
-Wartortle
-Blastoise
-```
 
 ## Additional Resources
 - [Ember Guides](https://guides.emberjs.com/v2.2.0/models/working-with-relationships/)
