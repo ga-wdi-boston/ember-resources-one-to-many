@@ -8,6 +8,7 @@ const Router = Ember.Router.extend({
 Router.map(function () {
   this.route('pokemon');
   this.route('items');
+  this.route('sightings');
 });
 
 export default Router;
