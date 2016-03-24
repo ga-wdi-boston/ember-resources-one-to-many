@@ -100,6 +100,13 @@ export default DS.Model.extend({
 });
 ```
 
+### Code-Along : Show Linked Data in a Template
+
+### Code-Along : Create a New Dependent Record, with Association
+
+### Code-Along : Implement "Dependent-Destroy" on the Front End
+
+### Code-Along : Update a Dependent Record's' Associations
 
 ## Additional Resources
 - [Ember Guides](https://guides.emberjs.com/v2.2.0/models/working-with-relationships/)
