@@ -2,90 +2,67 @@
 
 # Ember CRUD
 
-## Lesson Details
-### Foundations
-At this point, students have already learned how to:
+In the last session, we set out to have an Ember application that could perform
+ CRUD on two separate and unrelated resources,'pokemon' and 'items'.
+This is useful for a demonstration, but most of the time (as you probably know
+ by now) your application will need to employ some form of relationship.
+We will now explore how you can implement one-to-many relationships in an Ember
+ application, and how to perform CRUD operations on these related resources.
+
+## Prerequisites
+
+By now, you have already learned how to:
 
 - Create Ember Components to represent UI elements and encapsulate related data and behavior.
 - Use `ember-data` to set up Models representing business data.
 - Link the `ember-data` data store to a JSON API through an Adapter.
-- Set up a mock back-end using `ember-cli-mirage`
 
 ### Objectives
-By the end of this lesson, students should be able to:
 
-- Define a one-to-one relationship between different Models.
-- Define a one-to-many relationship between different Models.
-- Define a many-to-many relationship between different Models.
-- Define a self-referential relationship on a single Model.
-- Set up mocks for interrelated models (of each type above) using Mirage Fixtures.
+By the end of this session, you should be able to:
+
+-  Create a one-to-many relationship between two Models.
+-  Create a new dependent record.
+-  Update a relationship between two records.
+-  Implement 'dependent-destroy' on the front end, so that when a parent record
+    is destroyed, its dependent records are too.
 
 ### Setup
+
 1. Fork and clone this repo.
-2. Run `npm install && bower install`
-3. Run `ember install ember-legacy-views`
-4. Run `ember install ember-cli-mirage`, but _do not_ overwrite the `config.js` file. Additionally, delete the `scenarios` directory.
+1. Run `npm install` and `bower install`
+1. Go to the `ember-resources-api` repo that you've already cloned, and run
+    `git checkout 010/ember-resources-one-to-many`.
+1. Rub `bundle install` in the Rails repo, just as a precaution.
+1. Run `rake db:drop db:create db:migrate db:example:all`
 
-## `ember-data` Associations
-By the end of the last lesson, `ember-crud`, we set out to have an Ember application that could perform CRUD on two separate and unrelated resources, 'pokemon' and 'items'. This is useful for a demonstration, but most of the time (as you probably know by now) your application will need to employ some form of relationship. In this lesson, we'll explore how three different kinds of relationships - one-to-one, one-to-many, and many-to-many - can be implemented in an Ember application, and how test fixtures can be built for that kind of relationship. We will _not_ be focusing on CRUD; that's the topic of the next lesson.
+## `ember-data` Associations : One-to-Many
 
-### One-to-Many Relationship
-![Games](./readme-assets/cartridges.jpg)
-Pokemon games have been produced since 1996, and there are currently six generations of games. Each generation of games takes place in a different region of the 'world', and consequently introduces a new set of Pokemon into the large (and growing) Pokemon universe.
+Let's take our application to the next level and add a new feature: _sightings_!
 
-A 'generation' has :
-* a name (with date range)
-* a description (taken from Wikipedia) - one long string
-* a list of games in that generation, represented as an array of strings
+Every time someone spots a Pokemon, they'll create a new record in our
+ application indicating
 
-Let's go ahead and create a Model and Adapter for the 'generation' resource; afterwards, we'll make a Mirage fixture for them to hook into.
-```bash
-ember g model generation
-ember g adapter generation
-```
+- what Pokemon they saw
+- where and when they saw it
+- who made the observation
 
-Inside the 'generation' Model, let's define the following schema:
-```javascript
-export default DS.Model.extend({
-  name: DS.attr('string'),
-  description: DS.attr('string'),
-  games: DS.attr()
-});
-```
-> `games` is going to be an array, which is not one of the standard types that DS.attr can create, so we're just going to leave it unconfigured.
+Since many different people can see the same Pokemon (even in different places),
+ this is clearly a one-to-many relationship.
 
-We'll also need to make some small modifications to the adapter - basically, it should be the same as the adapter for 'item'.
-```javascript
-import ApplicationAdapter from '../application/adapter';
+As you can see we've already go a new Template (+ Route) routed up, along with a
+ link from the `index` Template.
+We've even got a model in place, with all of the attributes of a Sighting.
 
-export default ApplicationAdapter.extend({
-  namespace: 'api'
-});
-```
+### Code-Along : Link the Sighting and Pokemon Models
 
-Next, we would typically need to make a Mirage test fixture with some data inside Mirage; fortunately, one has already been created for you at `fixtures/generations.js`.
+### Code-Along : Show Linked Data in a Template
 
-Let's add routes to our new resource inside `config.js`.
-```javascript
-this.get('/generations');
-this.get('/generations/:id');
-this.post('/generations');
-this.put('/generations/:id');
-this.del('/generations/:id');
-```
+### Code-Along : Create a New Dependent Record, with Association
 
-Just for testing purposes, let's create a new Route for the 'index' view state (`ember g route index`), and add both 'pokemon' and 'generations' to the `model` method on that Route.
-```javascript
-export default Ember.Route.extend({
-  model: function(){
-    return {
-      generations: this.store.findAll('generation'),
-      pokemon: this.store.findAll('pokemon')
-    }
-  }
-});
-```
-If we then open up the Ember Inspector to the 'Data' tab, all of our data should be visible!
+### Code-Along : Implement "Dependent-Destroy" on the Front End
+
+### Code-Along : Update a Dependent Record's' Associations
 
 Now that the groundwork has been laid, let's come back to the topic of associations. In this app, we will model the relationship between resources 'generation' and 'pokemon' as a one-to-many relationship, where one 'generation' is associated with many different 'pokemon'.
 
