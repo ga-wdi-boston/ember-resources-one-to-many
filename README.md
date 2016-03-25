@@ -104,7 +104,65 @@ export default DS.Model.extend({
 
 ### Code-Along : Show Linked Data in a Template
 
+Once we've linked up our models, accessing and showing linked data is easy.
+
+Suppose that in addition to showing other data, we want `pokemon-snippet` to
+ show the number of times a particular Pokemon has been seen.
+
+Since the two models are already associated, all we can define a computed
+ property in the Component to get the total number of sightings of that
+ Component's Pokemon.
+
+```js
+// pokemon-snippet/component.js
+numSightings: Ember.computed('pokemon.sightings.@each', function(){
+  return this.get('pokemon.sightings').get('length');
+})
+```
+
+Then, all you'd need to do is reference that property in the Component Template.
+
+```html
+<!-- pokemon-snippet/template.hbs -->
+<p>Sightings So Far: {{numSightings}}</p>
+```
+
+It would also be a good idea to add `snippets` to the set of models loaded by
+ the `pokemon` Route, to ensure that the data store has up to date records on
+ both `pokemon` and `snippets` before loading the page.
+
+```js
+model: function(){
+  return {
+    pokemon: this.store.findAll('pokemon'),
+    sightings: this.store.findAll('sightings')
+  };
+}
+```
+
+Of course, doing this means that we'll need to update the `/pokemon` Template
+ accordingly, by changing `model` to `model.pokemon`.
+
+```html
+{{#each model.pokemon as |eachPokemon|}}
+```
+
+Now let's do the reverse by adding a reference to a Pokemon to the '
+ `sighting-snippet` template.
+Instead of saying "A Pokemon was seen", it should specify _which_ Pokemon was
+ spotted.
+
+```html
+<p>{{sighting.pokemon.name}} was seen at {{sighting.location}}</p>
+```
+
+Just as we did in the first case, we should make the `/sightings` Route load up
+ Pokemon as well as Sightings, and we'll need to update the top-level Template
+ too.
+
 ### Code-Along : Create a New Dependent Record, with Association
+
+
 
 ### Code-Along : Implement "Dependent-Destroy" on the Front End
 
