@@ -66,6 +66,8 @@ Let's add a new `pokemon` attribute to the `sighting` model.
 Unlike the others, which use `DS.attr`, we define relationships with separate
  methods : `.hasMany` and `.belongsTo`
 
+**app / sighting / model.js**
+
 ```javascript
 export default DS.Model.extend({
   observationTime: DS.attr('date'),
@@ -82,23 +84,11 @@ export default DS.Model.extend({
 Then, in the `pokemon` Model, we need to add a new property called `sightings`
  with the inverse relationship, `hasMany`.
 
-```javascript
-import Ember from 'ember';
-import DS from 'ember-data';
+**app / pokemon / model.js**
 
+```javascript
 export default DS.Model.extend({
-  nationalPokeNum: DS.attr('number'),
-  name: DS.attr('string'),
-  typeOne: DS.attr('string'),
-  typeTwo: DS.attr('string'),
-  types: Ember.computed.collect('typeOne', 'typeTwo'),
-  generation: DS.attr('number'),
-  totalPoints: DS.attr('number'),
-  baseHp: DS.attr('number'),
-  baseAttack: DS.attr('number'),
-  baseDefense: DS.attr('number'),
-  baseSpAttack: DS.attr('number'),
-  baseSpDefense: DS.attr('number'),
+  // ...
   baseSpeed: DS.attr('number'),
   sightings: DS.hasMany('sightings', {async: true})
 });
@@ -115,38 +105,56 @@ Since the two models are already associated, all we can define a computed
  property in the Component to get the total number of sightings of that
  Component's Pokemon.
 
+**app / components / pokemon-snippet / component.js**
+
 ```js
-// pokemon-snippet/component.js
-numSightings: Ember.computed('pokemon.sightings.@each', function(){
-  return this.get('pokemon.sightings').get('length');
-})
+export default Ember.Component.extend({
+  // ...
+  numSightings: Ember.computed('pokemon.sightings.@each', function(){
+    return this.get('pokemon.sightings').get('length');
+  })
+  // ...
+});
 ```
 
 Then, all you'd need to do is reference that property in the Component Template.
 
+**app / components / pokemon-snippet / template.hbs**
+
 ```html
-<!-- pokemon-snippet/template.hbs -->
-<p>Sightings So Far: {{numSightings}}</p>
+  <!-- ... -->
+  <p>Sightings So Far: {{numSightings}}</p>
+{{else}}
+  <!-- ... -->
 ```
 
 It would also be a good idea to add `snippets` to the set of models loaded by
  the `pokemon` Route, to ensure that the data store has up to date records on
  both `pokemon` and `snippets` before loading the page.
 
+**app / pokemon / route.js**
+
 ```js
-model: function(){
-  return Ember.RSVP.hash({
-    pokemon: this.store.findAll('pokemon'),
-    sightings: this.store.findAll('sightings')
-  });
-}
+export default Ember.Route.extend({
+  model: function(){
+    return Ember.RSVP.hash({
+      pokemon: this.store.findAll('pokemon'),
+      sightings: this.store.findAll('sightings')
+    });
+  },
+  // ...
+});
 ```
 
 Of course, doing this means that we'll need to update the `/pokemon` Template
  accordingly, by changing `model` to `model.pokemon`.
 
+**app / pokemon / template.hbs**
+
 ```html
+<!-- ... -->
 {{#each model.pokemon as |eachPokemon|}}
+<!-- ... -->
 ```
 
 Now let's do the reverse by adding a reference to a Pokemon to the '
@@ -154,8 +162,12 @@ Now let's do the reverse by adding a reference to a Pokemon to the '
 Instead of saying "A Pokemon was seen", it should specify _which_ Pokemon was
  spotted.
 
+**app / components / sighting-snippet / template.js**
+
 ```html
+<!-- ... -->
 <p>A {{sighting.pokemon.name}} was seen at {{sighting.location}}</p>
+<!-- ... -->
 ```
 
 Just as we did in the first case, we should make the `sightings` Route load up
@@ -180,22 +192,26 @@ One way we might address this is by creating a new computed property that's
  property up through `sendAction` instead.
 Let's call this new property `sightingProperties`.
 
+**app / components / sighting-form / component.js**
+
 ```js
-form: {},
-sightingProperties: Ember.computed('form', function(){
- return {
-   location: this.get('form.location'),
-   observationTime: new Date(this.get('form.observationTime')),
-   observer: this.get('form.observer')
- };
-}),
-actions: {
-  createSighting: function(){
-    console.log('Component Action : createSighting');
-    this.sendAction('routeCreateSighting', this.get('sightingProperties'));
-    this.set('form', {});
+export default Ember.Component.extend({
+  form: {},
+  sightingProperties: Ember.computed('form', function(){
+   return {
+     location: this.get('form.location'),
+     observationTime: new Date(this.get('form.observationTime')),
+     observer: this.get('form.observer')
+   };
+  }),
+  actions: {
+    createSighting: function(){
+      console.log('Component Action : createSighting');
+      this.sendAction('routeCreateSighting', this.get('sightingProperties'));
+      this.set('form', {});
+    }
   }
-}
+});
 ```
 
 We still can't create a new Sighting - our API has the constraint that
@@ -210,17 +226,22 @@ To actually associate a new sighting with a given Pokemon, we simply need to add
 Fortunately, the API does not get hit until we call `.save()`, so all we have to
  do is associate our new Sighting with a Pokemon first.
 
+**app / sightings / route.js**
+
 ```js
-actions: {
-  createItem: function(properties){
-    console.log('Route Action : createSighting');
-    let newSighting = this.store.createRecord('sighting', properties);
-    let pokemon = // ...
-    pokemon.get('sightings').pushObject(newSighting);
-    newSighting.save().then(()=>console.log('record created'));
-  },
+export default Ember.Route.extend({
   // ...
-}
+  actions: {
+    createSighting: function(properties){
+      console.log('Route Action : createSighting');
+      let newSighting = this.store.createRecord('sighting', properties);
+      let pokemon = // ...
+      pokemon.get('sightings').pushObject(newSighting);
+      newSighting.save().then(()=>console.log('record created'));
+    },
+    // ...
+  }
+});
 ```
 
 Suppose that we know what Pokemon was spotted because people record it when they
@@ -236,24 +257,29 @@ Note that if we use `findAll('pokemon')` to retrieve all Pokemon (so that we can
  search through them and find a match), we're going to need to use Promises to
  handle the results.
 
+**app / sightings / route.js**
+
 ```js
-actions: {
-  createSighting: function(properties, pokemonName){
-    console.log('Route Action : createSighting');
-    this.store.findAll('pokemon')
-      .then((allPokemon) => {
-        return allPokemon.find((pokemon) => pokemon.get('name') === pokemonName);
-      })
-      .then((pokemon) => {
-        if (pokemon) {  // not finding a match is not the same as failure
-          let newSighting = this.store.createRecord('sighting', properties);
-          pokemon.get('sightings').pushObject(newSighting);
-          newSighting.save().then(()=>console.log('record created'));
-        }
-      });
-  },
+export default Ember.Route.extend({
   // ...
-},
+  actions: {
+    createSighting: function(properties, pokemonName){
+      console.log('Route Action : createSighting');
+      this.store.findAll('pokemon')
+        .then((allPokemon) => {
+          return allPokemon.find((pokemon) => pokemon.get('name') === pokemonName);
+        })
+        .then((pokemon) => {
+          if (pokemon) {  // not finding a match is not the same as failure
+            let newSighting = this.store.createRecord('sighting', properties);
+            pokemon.get('sightings').pushObject(newSighting);
+            newSighting.save().then(()=>console.log('record created'));
+          }
+        });
+    },
+    // ...
+  }
+});
 ```
 
 Since the name of the Pokemon the user saw needs to be part of the form,
@@ -261,27 +287,36 @@ Since the name of the Pokemon the user saw needs to be part of the form,
  `pokemonName`; this can then be passed up to the Route as an argument of
  `sendAction`.
 
+**app / components / sighting-form / template.hbs**
+
 ```html
+<!-- ... -->
 <div>
  {{input placeholder='Pokemon' value=pokemonName}}
  {{input placeholder='Location' value=form.location}}
  {{input placeholder='Date and Time' value=form.observationTime}}
  {{input placeholder='Observer' value=form.observer}}
 </div>
+<!-- ... -->
 ```
 
+**app / components / sighting-form / component.js**
+
 ```js
-pokemonName: '',
-actions: {
-  createSighting: function(){
-    console.log('Component Action : createSighting');
-    this.sendAction('routeCreateSighting',
-        this.get('sightingProperties'),
-        this.get('pokemonName'));
-    this.set('form', {});
-    this.set('pokemonName', '');
+export default Ember.Component.extend({
+  // ...
+  pokemonName: '',
+  actions: {
+    createSighting: function(){
+      console.log('Component Action : createSighting');
+      this.sendAction('routeCreateSighting',
+          this.get('sightingProperties'),
+          this.get('pokemonName'));
+      this.set('form', {});
+      this.set('pokemonName', '');
+    }
   }
-}
+});
 ```
 
 We've created a new stand-alone property to represent the name
@@ -291,28 +326,37 @@ This is fine in this case, but could be tedious if we had lots of additional
 A more general approach might be to load `pokemonName` as part of `form`, and
  parse it out again through a computed property.
 
+**app / components / sighting-form / template.hbs**
+
 ```html
+<!-- ... -->
 <div>
   {{input placeholder='Pokemon' value=form.pokemonName}}
   {{input placeholder='Location' value=form.location}}
   {{input placeholder='Date and Time' value=form.observationTime}}
   {{input placeholder='Observer' value=form.observer}}
 </div>
+<!-- ... -->
 ```
 
+**app / components / sighting-form / component.js**
+
 ```js
-pokemonName: Ember.computed('form', function(){
- return this.get('form.pokemonName')
-}),
-actions: {
- createSighting: function(){
-   console.log('Component Action : createSighting');
-   this.sendAction('routeCreateSighting',
-       this.get('sightingProperties'),
-       this.get('pokemonName'));
-   this.set('form', {});
- }
-}
+export default Ember.Component.extend({
+  // ...
+  pokemonName: Ember.computed('form', function(){
+   return this.get('form.pokemonName')
+  }),
+  actions: {
+   createSighting: function(){
+     console.log('Component Action : createSighting');
+     this.sendAction('routeCreateSighting',
+         this.get('sightingProperties'),
+         this.get('pokemonName'));
+     this.set('form', {});
+   }
+  }
+});
 ```
 
 We should now be able to create new Sightings and have them show up on the page.
@@ -334,6 +378,8 @@ Suppose that we want Pokemon records to destroy their dependent records (in this
  case, Sightings) before they get destroyed.
 We already have the machinery in place for destroying Pokemon records:
 
+**app / pokemon / route.js**
+
 ```js
 export default Ember.Route.extend({
   model: function(){
@@ -354,6 +400,8 @@ export default Ember.Route.extend({
 
 All we need to do is to start by destroying all the Sightings associated with
  that Pokemon.
+
+**app / pokemon / route.js**
 
 ```js
 export default Ember.Route.extend({
@@ -401,6 +449,8 @@ In any event, we should _not_ bind it to `sighting.pokemon.name` - doing this
  would change _the name of the associated Pokemon_, rather than _which Pokemon_
  the Sighting was associated with.
 
+**app / component / sighting-snippet / template.hbs**
+
 ```html
 <!-- ... -->
 {{else}}
@@ -410,6 +460,8 @@ In any event, we should _not_ bind it to `sighting.pokemon.name` - doing this
 {{/unless}}
 <!-- ... -->
 ```
+
+**app / component / sighting-snippet / component.js**
 
 ```js
 export default Ember.Component.extend({
@@ -426,6 +478,8 @@ export default Ember.Component.extend({
 
 We'll need to move this new value up to the Route's actions, so let's pass it to
  `sendAction` as another argument.
+
+**app / component / sighting-snippet / component.js**
 
 ```js
 export default Ember.Component.extend({
@@ -449,6 +503,8 @@ In the Route's `updateSighting` action, we'll need to take this name and use it
 Once we've found the Pokemon, we can associate our Sighting with that Pokemon -
  since a Sighting can only be associated with _one_ Pokemon, this will fully
  replace the old relationship.
+
+**app / sightings / route.js**
 
 ```js
 export default Ember.Route.extend({
@@ -484,6 +540,8 @@ One way to do this might be to implement "one-way binding" between `pokemonName`
  `pokemonName`, but not vice-versa.
 Fortunately, Ember provides a special computed property called
  `Ember.computed.oneWay` which allows us to do just that.
+
+**app / component / sighting-snippet / component.js**
 
 ```js
 export default Ember.Component.extend({
