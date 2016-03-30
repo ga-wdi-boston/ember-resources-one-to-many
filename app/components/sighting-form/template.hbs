@@ -1,0 +1,7 @@
+<h5> Report a Pokemon Sighting </h5>
+<div>
+  {{input placeholder='Location' value=form.location}}
+  {{input placeholder='Date and Time' value=form.observationTime}}
+  {{input placeholder='Observer' value=form.observer}}
+</div>
+<button {{action 'createSighting'}}> Submit </button>

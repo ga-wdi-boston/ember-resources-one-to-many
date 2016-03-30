@@ -1,0 +1,7 @@
+{{sighting-form}}
+
+{{#each model.sightings as |eachSighting|}}
+  {{sighting-snippet sighting=eachSighting
+                     routeUpdateSighting='updateSighting'
+                     routeDestroySighting='destroySighting'}}
+{{/each}}

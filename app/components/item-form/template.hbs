@@ -1,0 +1,7 @@
+<h5> Create an Item </h5>
+<div>
+  {{input placeholder='Name' value=form.name}}
+  {{input placeholder='Category' value=form.category}}
+  {{input placeholder='Effect' value=form.effect}}
+</div>
+<button {{action 'createItem'}}> Add a New Item </button>

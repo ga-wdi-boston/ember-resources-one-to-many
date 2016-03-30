@@ -5,13 +5,20 @@ export default Ember.Route.extend({
     return this.store.findAll('item');
   },
   actions: {
-    createItem: function(newItemData){
-      var newItem = this.store.createRecord('item', newItemData);
-      newItem.save();
+    createItem: function(properties){
+      console.log('Route Action : createItem');
+      this.store.createRecord('item', properties)
+        .save().then(()=>console.log('record created'));
     },
-    destroyItem: function(item){
-      this.store.findRecord('item', item.get('id')).then(function(itemRecord){
-        itemRecord.destroyRecord();
+    updateItem: function(item) {
+      console.log('Route Action : updateItem');
+      item.save();
+    },
+    destroyItem: function(id){
+      console.log('Route Action : destroyItem');
+      this.store.findRecord('item', id).then((item) => {
+        this.store.deleteRecord(item);
+        console.log(`record ${id} destroyed`);
       });
     }
   }
