@@ -53,8 +53,9 @@ Since many different people can see the same Pokemon (even in different places),
 
 As you can see we've already go a new Template (+ Route) routed up, along with a
  link from the `index` Template.
-We've even got a model in place, with all of the attributes of a Sighting, and a
- `sighting-snippet` component to represent each sighting on the page.
+We've even got a model in place, with all of the attributes of a Sighting, and
+ two components: a `sighting-snippet` component to represent each Sighting on
+ the page, and a `sighting-form` component for creating new Sightings.
 Everything's ready, so let's get started!
 
 ### Code-Along : Link the Sighting and Pokemon Models
