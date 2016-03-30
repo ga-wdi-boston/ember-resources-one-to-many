@@ -2,7 +2,10 @@ import Ember from 'ember';
 
 export default Ember.Route.extend({
   model: function(){
-    return this.store.findAll('pokemon');
+    return {
+      pokemon: this.store.findAll('pokemon'),
+      sightings: this.store.findAll('sighting')
+    };
   },
   actions: {
     createPokemon: function(properties){
@@ -16,6 +19,7 @@ export default Ember.Route.extend({
     },
     destroyPokemon: function(pokemon){
       console.log('Route Action : destroyPokemon');
+      pokemon.get('sightings').forEach((sighting) => sighting.destroyRecord());
       pokemon.destroyRecord();
     }
   }

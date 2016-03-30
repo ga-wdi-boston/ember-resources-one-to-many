@@ -1,12 +1,13 @@
 <hr>
 <div>
 {{#unless isEditable}}
-  <p>A Pokemon was seen at {{sighting.location}}</p>
-  <p>
-    on {{sighting.observationTime}}{{#if sighting.observer}}
-    by {{sighting.observer}}{{/if}}.
+  <p>A {{sighting.pokemon.name}} was seen at {{sighting.location}}</p>
+  <p>on {{sighting.observationTime}}
+    {{#if sighting.observer}} by {{sighting.observer}}{{/if}}.
   </p>
 {{else}}
+  <p> Pokemon:
+      {{input placeholder=pokemonName value=pokemonName}}</p>
   <p> Location:
       {{input placeholder=sighting.location value=sighting.location}}</p>
   <p> Observer:

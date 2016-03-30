@@ -1,6 +1,6 @@
 {{pokemon-form routeCreatePokemon='createPokemon'}}
 <ul>
-{{#each model as |eachPokemon|}}
+{{#each model.pokemon as |eachPokemon|}}
   {{pokemon-snippet pokemon=eachPokemon
       routeUpdatePokemon='updatePokemon'
       routeDestroyPokemon='destroyPokemon'

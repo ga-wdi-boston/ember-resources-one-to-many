@@ -14,5 +14,7 @@ export default DS.Model.extend({
   baseDefense: DS.attr('number'),
   baseSpAttack: DS.attr('number'),
   baseSpDefense: DS.attr('number'),
-  baseSpeed: DS.attr('number')
+  baseSpeed: DS.attr('number'),
+
+  sightings: DS.hasMany('sightings', {async: true})
 });

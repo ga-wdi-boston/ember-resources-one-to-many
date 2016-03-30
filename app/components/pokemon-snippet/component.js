@@ -5,6 +5,9 @@ export default Ember.Component.extend({
   twoTypes: Ember.computed('pokemon.types', function(){
     return this.get('pokemon.types').get('length') > 1;
   }),
+  numSightings: Ember.computed('pokemon.sightings.@each', function(){
+    return this.get('pokemon.sightings').get('length');
+  }),
   isEditable: false,
   actions: {
     updatePokemon: function(){
