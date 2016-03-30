@@ -402,5 +402,100 @@ Easy, right?
 
 ### Code-Along : Update a Dependent Record's' Associations
 
+Last but not least, let's handle 'update'.
+Since both related resources, Pokemon and Sightings, can already be updated
+ independently, the only thing we still need to figure out how to update is
+ the relationship itself.
+In other words, how can we change the Pokemon that a Sighting refers to?
+
+As with CRUD of non-associated records, the exact way that you handle 'update'
+ will depend on your UI.
+Let's assume that we want to follow the same "content-editable" approach we've
+ used so far, and update a Sighting's association through the `sighting-snippet`
+ Component.
+
+Let's update the Template for `sighting-snippet` to add an input box for editing
+ the Pokemon that the Sighting refers to, and bind its value to a new property
+ on the Component called `pokemonName`.
+Although we technically could bind it to a property on `sighting`, `sighting`
+ is a model, and the input value of the form is really a UI concern rather than
+ a data concern (since it's specific to our 'content-editable' implementation),
+ so it would make more sense for it to only exist in the Component.
+In any event, we should _not_ bind it to `sighting.pokemon.name` - doing this
+ would change _the name of the associated Pokemon_, rather than _which Pokemon_
+ the Sighting was associated with.
+
+```html
+<!-- ... -->
+{{else}}
+  <p> Pokemon:
+    {{input value=pokemonName}}</p>
+  <!-- ... -->
+{{/unless}}
+<!-- ... -->
+```
+
+```js
+export default Ember.Component.extend({
+  isEditable: false,
+  doubleClick: function(){
+    this.toggleProperty('isEditable');
+  },
+  pokemonName: '',
+  actions: {
+    // ...
+  }
+});
+```
+
+We'll need to move this new value up to the Route's actions, so let's pass it to
+ `sendAction` as another argument.
+
+```js
+export default Ember.Component.extend({
+  // ...
+  pokemonName: '',
+  actions: {
+    updateSighting: function(){
+      console.log('Component Action : updateSighting');
+      this.set('isEditable', false);
+      this.sendAction('routeUpdateSighting',
+        this.get('sighting'),
+        this.get('pokemonName'));
+    },
+    // ...
+  }
+});
+```
+
+In the Route's `updateSighting` action, we'll need to take this name and use it
+ to look up that Pokemon.
+Once we've found the Pokemon, we can associate our Sighting with that Pokemon -
+ since a Sighting can only be associated with _one_ Pokemon, this will fully
+ replace the old relationship.
+
+```js
+export default Ember.Route.extend({
+  // ...
+  actions: {
+    // ...
+    updateSighting: function(sighting, pokemonName) {
+      console.log('Route Action : updateSighting');
+      this.store.findAll('pokemon')
+        .then((allPokemon) => {
+          return allPokemon.find((pokemon) => pokemon.get('name') === pokemonName);
+        })
+        .then((pokemon) => {
+          if (pokemon) {
+            pokemon.get('sightings').pushObject(sighting);
+          }
+          sighting.save();
+        });
+    },
+    // ...
+  }
+});
+```
+
 ## Additional Resources
 - [Ember Guides](https://guides.emberjs.com/v2.2.0/models/working-with-relationships/)
