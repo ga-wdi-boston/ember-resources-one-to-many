@@ -13,28 +13,29 @@ We will now explore how you can implement one-to-many relationships in an Ember
 
 By now, you have already learned how to:
 
-- Create Ember Components to represent UI elements and encapsulate related data and behavior.
-- Use `ember-data` to set up Models representing business data.
-- Link the `ember-data` data store to a JSON API through an Adapter.
+-   Create Ember Components to represent UI elements and encapsulate related
+     data and behavior.
+-   Use `ember-data` to set up Models representing business data.
+-   Link the `ember-data` data store to a JSON API through an Adapter.
 
 ### Objectives
 
 By the end of this session, you should be able to:
 
--  Create a one-to-many relationship between two Models.
--  Create a new dependent record.
--  Update a relationship between two records.
--  Implement 'dependent-destroy' on the front end, so that when a parent record
-    is destroyed, its dependent records are too.
+-   Create a one-to-many relationship between two Models.
+-   Create a new dependent record.
+-   Update a relationship between two records.
+-   Implement 'dependent-destroy' on the front end, so that when a parent record
+     is destroyed, its dependent records are too.
 
 ### Setup
 
-1. Fork and clone this repo.
-1. Run `npm install` and `bower install`
-1. Go to the `ember-resources-api` repo that you've already cloned, and run
-    `git checkout 010/ember-resources-one-to-many`.
-1. Rub `bundle install` in the Rails repo, just as a precaution.
-1. Run `rake db:drop db:create db:migrate db:example:all`
+1.  Fork and clone this repo.
+1.  Run `npm install` and `bower install`
+1.  Go to the `ember-resources-api` repo that you've already cloned, and run
+     `git checkout 010/ember-resources-one-to-many`.
+1.  Rub `bundle install` in the Rails repo, just as a precaution.
+1.  Run `rake db:drop db:create db:migrate db:example:all`
 
 ## `ember-data` Associations : One-to-Many
 
@@ -43,9 +44,9 @@ Let's take our application to the next level and add a new feature: _sightings_!
 Every time someone spots a Pokemon, they'll create a new record in our
  application indicating
 
-- what Pokemon they saw
-- where and when they saw it
-- who made the observation
+-   what Pokemon they saw
+-   where and when they saw it
+-   who made the observation
 
 Since many different people can see the same Pokemon (even in different places),
  this is clearly a one-to-many relationship.
@@ -523,4 +524,5 @@ Now when we double click a `sighting-snippet` component, we see the Pokemon's
  name in the field!
 
 ## Additional Resources
-- [Ember Guides](https://guides.emberjs.com/v2.2.0/models/working-with-relationships/)
+
+-   [Ember Guides](https://guides.emberjs.com/v2.2.0/models/working-with-relationships/)
