@@ -497,5 +497,30 @@ export default Ember.Route.extend({
 });
 ```
 
+Let's do one final thing.
+At this moment, the form field for the Pokemon's name is blank to start, while
+ all of the other fields are populated.
+Wouldn't it be great if that showed the name of the Pokemon that the sighting is
+ currently associated with?
+
+One way to do this might be to implement "one-way binding" between `pokemonName`
+ and `sighting.pokemon.name`, so that changing `sighting.pokemon.name` changes
+ `pokemonName`, but not vice-versa.
+Fortunately, Ember provides a special computed property called
+ `Ember.computed.oneWay` which allows us to do just that.
+
+```js
+export default Ember.Component.extend({
+  // ...
+  pokemonName: Ember.computed.oneWay('sighting.pokemon.name'),
+  actions: {
+    // ...
+  }
+});
+```
+
+Now when we double click a `sighting-snippet` component, we see the Pokemon's
+ name in the field!
+
 ## Additional Resources
 - [Ember Guides](https://guides.emberjs.com/v2.2.0/models/working-with-relationships/)
