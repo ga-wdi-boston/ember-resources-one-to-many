@@ -133,10 +133,10 @@ It would also be a good idea to add `snippets` to the set of models loaded by
 
 ```js
 model: function(){
-  return {
+  return Ember.RSVP.hash({
     pokemon: this.store.findAll('pokemon'),
     sightings: this.store.findAll('sightings')
-  };
+  });
 }
 ```
 
@@ -153,10 +153,10 @@ Instead of saying "A Pokemon was seen", it should specify _which_ Pokemon was
  spotted.
 
 ```html
-<p>{{sighting.pokemon.name}} was seen at {{sighting.location}}</p>
+<p>A {{sighting.pokemon.name}} was seen at {{sighting.location}}</p>
 ```
 
-Just as we did in the first case, we should make the `/sightings` Route load up
+Just as we did in the first case, we should make the `sightings` Route load up
  Pokemon as well as Sightings, and we'll need to update the top-level Template
  too.
 
