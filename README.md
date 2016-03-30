@@ -244,8 +244,8 @@ actions: {
   createItem: function(properties){
     console.log('Route Action : createSighting');
     let newSighting = this.store.createRecord('sighting', properties);
-    let observedPokemon = // ...
-    observedPokemon.get('sightings').pushObject(newSighting);
+    let pokemon = // ...
+    pokemon.get('sightings').pushObject(newSighting);
     newSighting.save().then(()=>console.log('record created'));
   },
   // ...
@@ -270,10 +270,10 @@ actions: {
       .then((allPokemon) => {
         return allPokemon.find((pokemon) => pokemon.get('name') === pokemonName);
       })
-      .then((observedPokemon) => {
-        if (observedPokemon) {  // not finding a match is not the same as failure
+      .then((pokemon) => {
+        if (pokemon) {  // not finding a match is not the same as failure
           let newSighting = this.store.createRecord('sighting', properties);
-          observedPokemon.get('sightings').pushObject(newSighting);
+          pokemon.get('sightings').pushObject(newSighting);
           newSighting.save().then(()=>console.log('record created'));
         }
       });
@@ -291,10 +291,10 @@ actions: {
   createSighting: function(properties, pokemonName){
     console.log('Route Action : createSighting');
     this.store.filter('pokemon',(pokemon) => pokemon.get('name') === pokemonName)
-      .then((observedPokemon) => {
-        if (observedPokemon) {  // not finding a match is not the same as failure
+      .then((pokemon) => {
+        if (pokemon) {  // not finding a match is not the same as failure
           let newSighting = this.store.createRecord('sighting', properties);
-          observedPokemon.get('sightings').pushObject(newSighting);
+          pokemon.get('sightings').pushObject(newSighting);
           newSighting.save().then(()=>console.log('record created'));
         }
       });
