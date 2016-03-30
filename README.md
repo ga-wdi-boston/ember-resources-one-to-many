@@ -282,27 +282,6 @@ actions: {
 },
 ```
 
-Ember Data actually has a built-in function called `filter`, intended
- specifically for looking at a subset of records, so we can refactor that code
- a little and make it simpler.
-
-```js
-actions: {
-  createSighting: function(properties, pokemonName){
-    console.log('Route Action : createSighting');
-    this.store.filter('pokemon',(pokemon) => pokemon.get('name') === pokemonName)
-      .then((pokemon) => {
-        if (pokemon) {  // not finding a match is not the same as failure
-          let newSighting = this.store.createRecord('sighting', properties);
-          pokemon.get('sightings').pushObject(newSighting);
-          newSighting.save().then(()=>console.log('record created'));
-        }
-      });
-  },
-  // ...
-},
-```
-
 Since we want the user to be filling out the name of the Pokemon they saw in the
  form, what we need to do is collect `pokemonName` from the form as well, and
  pass it up to the Route as an argument of `sendAction`.
