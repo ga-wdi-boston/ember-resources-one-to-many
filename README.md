@@ -364,6 +364,63 @@ A more general approach might be to load `pokemonName` as part of `form`, and
 
 ### Code-Along : Implement "Dependent-Destroy" on the Front End
 
+Many APIs will implement 'dependent-destroy' behavior: in order to prevent the
+ creation of orphan records, when a parent record is to be destroyed, all of its
+ child records are destroyed first.
+However, it's possible that your API may not implement this.
+Alternatively, your front-end may be linking two different Web APIs that have no
+ knowledge of each other - in that case, something like 'dependent-destroy'
+ would impossible to implement on the back-end.
+
+Fortunately, it is not only possible to handle this kind of behavior on Ember,
+ it's actually quite easy.
+
+Suppose that we want Pokemon records to destroy their dependent records (in this
+ case, Sightings) before they get destroyed.
+We already have the machinery in place for destroying Pokemon records:
+
+```js
+export default Ember.Route.extend({
+  model: function(){
+    return {
+      pokemon: this.store.findAll('pokemon'),
+      sightings: this.store.findAll('sighting')
+    };
+  },
+  actions: {
+    //...
+    destroyPokemon: function(pokemon){
+      console.log('Route Action : destroyPokemon');
+      pokemon.destroyRecord();
+    }
+  }
+});
+```
+
+All we need to do is to start by destroying all the Sightings associated with
+ that Pokemon.
+
+```js
+export default Ember.Route.extend({
+ model: function(){
+   return {
+     pokemon: this.store.findAll('pokemon'),
+     sightings: this.store.findAll('sighting')
+   };
+ },
+ actions: {
+   //...
+   destroyPokemon: function(pokemon){
+     console.log('Route Action : destroyPokemon');
+     pokemon.get('sightings').forEach((sighting) => sighting.destroyRecord());
+     pokemon.destroyRecord();
+   }
+ }
+});
+```
+
+Easy, right?
+
 ### Code-Along : Update a Dependent Record's' Associations
 
 ## Additional Resources
