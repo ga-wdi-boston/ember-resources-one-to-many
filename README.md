@@ -526,3 +526,8 @@ Now when we double click a `sighting-snippet` component, we see the Pokemon's
 ## Additional Resources
 
 -   [Ember Guides](https://guides.emberjs.com/v2.2.0/models/working-with-relationships/)
+
+## [License](LICENSE)
+
+Source code distributed under the MIT license. Text and other assets copyright
+General Assembly, Inc., all rights reserved.
