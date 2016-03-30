@@ -1,6 +1,6 @@
 ![General Assembly Logo](http://i.imgur.com/ke8USTq.png)
 
-# Ember CRUD
+# Ember Resources : One-to-Many
 
 In the last session, we set out to have an Ember application that could perform
  CRUD on two separate and unrelated resources,'pokemon' and 'items'.
