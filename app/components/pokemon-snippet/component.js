@@ -3,7 +3,7 @@ import Ember from 'ember';
 export default Ember.Component.extend({
   tagName: 'li',
   twoTypes: Ember.computed('pokemon.types', function(){
-    return this.get('pokemon.types').length > 1;
+    return this.get('pokemon.types').get('length') > 1;
   }),
   isEditable: false,
   actions: {
