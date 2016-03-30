@@ -162,7 +162,205 @@ Just as we did in the first case, we should make the `sightings` Route load up
 
 ### Code-Along : Create a New Dependent Record, with Association
 
+As with our other resources, if we want to create new Sighting instances, we're
+ going to need a form so that we can input the new data.
+Let's generate a new component called `sighting-form`, with the same structure
+ as the forms for Pokemon and Items.
 
+Given how we set up the Components for creating new Pokemon and Items, our new
+ Component Template and Component Object should look something like this:
+
+```html
+<h5> Report a Pokemon Sighting </h5>
+<div>
+  {{input placeholder='Location' value=form.location}}
+  {{input placeholder='Date and Time' value=form.observationTime}}
+  {{input placeholder='Observer' value=sightingForm.observer}}
+</div>
+<button {{action 'createSighting'}}> Submit </button>
+```
+
+```js
+form: {},
+actions: {
+  createSighting: function(){
+    console.log('Component Action : createSighting');
+    this.sendAction('routeCreateSighting', this.get('form'));
+    this.set('form', {});
+  }
+}
+```
+
+In the `sightings` Route, we'll need to modify our `createSighting` action
+ to access the Sighting model; based on how this worked with Items and Pokemon,
+ we might start off with:
+
+```js
+actions: {
+ createItem: function(properties){
+   console.log('Route Action : createSighting');
+   this.store.createRecord('sighting', properties)
+     .save().then(()=>console.log('record created'));
+ },
+ // ...
+}
+```
+
+Before we move on, there's another complication we need to deal with.
+When someone inputs a date/time into the form, it needs to be converted to a
+ Date before it can be passed to the back end.
+We could try and handle this in the Route, but it's really more of a UI concern
+ so let's handle it in the Component instead.
+
+Binding to the `form` object is really convenient, but it doesn't give us any
+ opportunity to transform the data in the middle of the binding process.
+One way we might address this is by creating a new computed property that's
+ _based on_ `form` (but with some modifications), and pass that new property
+ up through `sendAction` instead.
+Let's call this new property `sightingProperties`.
+
+```js
+form: {},
+sightingProperties: Ember.computed('form', function(){
+  return {
+    location: this.get('form.location'),
+    observationTime: new Date(this.get('form.observationTime')),
+    observer: this.get('form.observer')
+  };
+}),
+```
+
+Our API has the constraint, however, that `pokemon_id` must not be null --
+ in other words, every sighting _must_ be associated with a Pokemon.
+
+The API does not get hit until we call `.save()`; therefore, we'll need to
+ modify the Sighting record before then if we want the API to accept our
+ request.
+To actually associate the new sighting with a given Pokemon, we simply add this
+ new sighting to the list of that Pokemon's sightings.
+
+```js
+actions: {
+  createItem: function(properties){
+    console.log('Route Action : createSighting');
+    let newSighting = this.store.createRecord('sighting', properties);
+    let observedPokemon = // ...
+    observedPokemon.get('sightings').pushObject(newSighting);
+    newSighting.save().then(()=>console.log('record created'));
+  },
+  // ...
+}
+```
+
+Suppose that we know what Pokemon was sighting because that value gets passed in
+ throught the `create-sighting` form. In that case, that additional piece of
+ data might get passed up along with the properties for the new Sighting.
+Given the name of the Pokemon that was seen, we can search through the list of
+ Pokemon, find a matching name, and add the new sighting to the given Pokemon's
+ properties.
+
+If we use `findAll('pokemon')`, we're going to need to use Promises to handle
+ the results.
+
+```js
+actions: {
+  createSighting: function(properties, pokemonName){
+    console.log('Route Action : createSighting');
+    this.store.findAll('pokemon')
+      .then((allPokemon) => {
+        return allPokemon.find((pokemon) => pokemon.get('name') === pokemonName);
+      })
+      .then((observedPokemon) => {
+        if (observedPokemon) {  // not finding a match is not the same as failure
+          let newSighting = this.store.createRecord('sighting', properties);
+          observedPokemon.get('sightings').pushObject(newSighting);
+          newSighting.save().then(()=>console.log('record created'));
+        }
+      });
+  },
+  // ...
+},
+```
+
+Ember Data actually has a built-in function called `filter`, intended
+ specifically for looking at a subset of records, so we can refactor that code
+ a little and make it simpler.
+
+```js
+actions: {
+  createSighting: function(properties, pokemonName){
+    console.log('Route Action : createSighting');
+    this.store.filter('pokemon',(pokemon) => pokemon.get('name') === pokemonName)
+      .then((observedPokemon) => {
+        if (observedPokemon) {  // not finding a match is not the same as failure
+          let newSighting = this.store.createRecord('sighting', properties);
+          observedPokemon.get('sightings').pushObject(newSighting);
+          newSighting.save().then(()=>console.log('record created'));
+        }
+      });
+  },
+  // ...
+},
+```
+
+Since we want the user to be filling out the name of the Pokemon they saw in the
+ form, what we need to do is collect `pokemonName` from the form as well, and
+ pass it up to the Route as an argument of `sendAction`.
+
+```html
+<div>
+ {{input placeholder='Pokemon' value=pokemonName}}
+ {{input placeholder='Location' value=form.location}}
+ {{input placeholder='Date and Time' value=form.observationTime}}
+ {{input placeholder='Observer' value=form.observer}}
+</div>
+```
+
+```js
+pokemonName: '',
+actions: {
+  createSighting: function(){
+    console.log('Component Action : createSighting');
+    this.sendAction('routeCreateSighting',
+        this.get('form'),
+        this.get('pokemonName'));
+    this.set('form', {});
+    this.set('pokemonName', '');
+  }
+}
+```
+
+We've created a new stand-alone property to represent the name
+ of the Pokemon that was spotted.
+This is fine in this case, but could be tedious if we had lots of additional
+ properties that we cared about.
+A more general approach might be to load `pokemonName` as part of `form`, and
+ parse it out again through a computed property, just like we did with
+ `sightingProperties`.
+
+ ```html
+ <div>
+  {{input placeholder='Pokemon' value=form.pokemonName}}
+  {{input placeholder='Location' value=form.location}}
+  {{input placeholder='Date and Time' value=form.observationTime}}
+  {{input placeholder='Observer' value=form.observer}}
+ </div>
+ ```
+
+ ```js
+ pokemonName: Ember.computed('form', function(){
+   return this.get('form.pokemonName')
+ }),
+ actions: {
+   createSighting: function(){
+     console.log('Component Action : createSighting');
+     this.sendAction('routeCreateSighting',
+         this.get('form'),
+         this.get('pokemonName'));
+     this.set('form', {});
+   }
+ }
+ ```
 
 ### Code-Along : Implement "Dependent-Destroy" on the Front End
 
